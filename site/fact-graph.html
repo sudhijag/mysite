@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Building a Personal Fact Graph — Sudhi Jagadeeshi</title>
+<meta name="description" content="How I turned plain text facts about my life into an interactive graph using embeddings, k-NN, and Louvain community detection.">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+.post{max-width:680px;margin:0 auto;padding:clamp(72px,12vh,100px) clamp(24px,6vw,72px) clamp(40px,8vh,80px)}
+.post__back{position:fixed;top:clamp(14px,3vh,28px);left:clamp(16px,4vw,40px);display:inline-flex;align-items:center;gap:6px;font-size:12.5px;color:var(--ink-faded);text-decoration:none;transition:color .2s;z-index:10;background:color-mix(in oklab,var(--paper) 80%,transparent);backdrop-filter:blur(8px);padding:6px 12px 6px 8px;border-radius:999px;border:1px solid var(--rule)}
+.post__back:hover{color:var(--accent);border-color:var(--accent)}
+.post__back svg{flex-shrink:0}
+.post h1{font-size:clamp(22px,4vh,36px);font-weight:700;line-height:1.15;letter-spacing:-.015em;margin:0 0 clamp(16px,3vh,28px)}
+.post__meta{font-size:12px;color:var(--ink-faded);margin-bottom:clamp(28px,5vh,52px)}
+.post h2{font-size:15px;font-weight:700;margin:clamp(28px,4vh,44px) 0 10px;color:var(--ink)}
+.post p{font-size:14px;line-height:1.75;color:var(--ink);margin:0 0 16px;text-wrap:pretty}
+.post pre{background:color-mix(in oklab,var(--paper) 60%,transparent);border:1px solid var(--rule);border-radius:10px;padding:18px 20px;overflow-x:auto;margin:0 0 20px}
+.post code{font-family:var(--font-mono);font-size:12.5px;color:var(--ink);line-height:1.7}
+.post ul{font-size:14px;line-height:1.75;color:var(--ink);margin:0 0 16px;padding-left:20px}
+.post ul li{margin-bottom:6px;text-wrap:pretty}
+.post a{color:var(--accent);text-underline-offset:3px}
+.post a:hover{color:var(--ink)}
+.post__rule{height:1px;background:var(--rule);border:none;margin:clamp(28px,4vh,44px) 0}
+</style>
+</head>
+<body>
+<canvas id="dots" aria-hidden="true"></canvas>
+<main style="min-height:unset">
+<article class="post">
+<a class="post__back" href="index.html"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3L5 8l5 5"/></svg>back</a>
+<h1>Building a Personal Fact Graph</h1>
+<hr class="post__rule">
+<h2>What it is</h2>
+<p>I built a graph that turns plain text facts about my life into an interactive visualization. Each fact gets added, enriched with context, and placed near facts that relate to it. The output is a map that shows how the pieces of my life connect.</p>
+<h2>How the pipeline works</h2>
+<pre><code>  new fact (plain text)
+        |
+        v
+  web search for context (Tavily)
+        |
+        v
+  summarize fact + context (GPT-4o-mini)
+        |
+        v
+  embed summary (text-embedding-3-small)
+        |
+        v
+  build mutual k-NN graph over embeddings
+        |
+        v
+  Louvain community detection
+        |
+        v
+  labeled clusters, rendered as a graph</code></pre>
+<h2>Getting the clustering right</h2>
+<p>This part took a few tries.</p>
+<ul>
+<li>HDBSCAN was the first attempt. It left about a third of items unclustered as noise, which defeats the point of a graph meant to hold everything.</li>
+<li>Agglomerative clustering with silhouette-based K selection was next. Silhouette scores kept favoring implausible K values, like K=15 for a set of 30 facts. The metric was optimizing for tight, well-separated blobs, which isn't how personal facts are actually distributed.</li>
+<li>The fix was to stop treating this as a geometric clustering problem. Personal facts don't sit in clean separable clusters — they sit in a web of overlapping, weaker connections. Building a mutual k-NN graph and running Louvain community detection on it matches that structure instead of fighting it.</li>
+</ul>
+<p>Two other details mattered:</p>
+<ul>
+<li>The mean pairwise cosine similarity across facts was much lower than expected, something like 0.18. A similarity threshold tuned for a domain like news articles (0.50) was far too strict and collapsed a graph with nearly 200 mutual edges down to 6. Dropping the threshold to around 0.30 restored the graph.</li>
+<li>Louvain's resolution parameter needed manual tuning to avoid both a handful of giant clusters and dozens of tiny ones.</li>
+<li>The labeling prompt explicitly forbids generic names like "Overview" or "Miscellaneous," which pushed the model toward specific, descriptive cluster names instead of defaulting to filler categories.</li>
+</ul>
+<h2>What's next</h2>
+<ul>
+<li>Testing alternative community detection methods (Leiden in particular) to see if it gives more stable clusters across reruns, since Louvain's output can shift slightly depending on node ordering.</li>
+<li>Looking into temporal decay, so older facts that are less relevant to who I am now have less pull on the graph's structure.</li>
+<li>Exploring whether edge weights should incorporate more than cosine similarity — possibly blending in recency or source confidence from the web search step.</li>
+<li>Considering a lightweight way to re-cluster incrementally as new facts come in, rather than rerunning the full pipeline each time.</li>
+<li>Thinking about whether cluster labels should evolve over time as a community's contents shift, instead of being fixed at creation.</li>
+</ul>
+</article>
+</main>
+<script src="grid.js"></script>
+</body>
+</html>
