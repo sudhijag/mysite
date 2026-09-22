@@ -1,0 +1,33 @@
+:root{--font-mono:"Courier Prime",ui-monospace,Menlo,monospace;--paper:#0d0c0a;--ink:#ece6d4;--ink-soft:#c2b9a6;--ink-faded:#8a8275;--accent:#d4a85a;--rule:#2e2a24}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;background:var(--paper)}
+body{font-family:var(--font-mono);color:var(--ink)}
+a{color:inherit}
+a:hover{color:var(--accent)}
+::selection{background:var(--accent);color:var(--paper)}
+#dots{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+main{position:relative;z-index:2;min-height:100vh;max-width:920px;margin:0 auto;padding:clamp(14px,4vh,56px) clamp(24px,6vw,72px);display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,3vh,36px)}
+header{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.8vh,20px);margin-top:clamp(-48px,-4vh,0px);text-align:center}
+.hero-bloom{width:clamp(60px,12vh,140px);color:var(--ink)}
+.corner-bloom{position:fixed;right:clamp(12px,3vw,40px);top:clamp(12px,4vh,40px);width:80px;opacity:.5;z-index:1;color:var(--ink)}
+.bloom{display:block;width:100%;height:auto;transform-origin:50% 50%}
+.bloom:hover{animation:bloomSway 3.4s ease-in-out infinite}
+@keyframes bloomSway{0%,100%{transform:rotate(-2.6deg) scale(1)}50%{transform:rotate(2.6deg) scale(1.028)}}
+h1{margin:0;font-weight:700;font-size:clamp(28px,5.2vh,56px);letter-spacing:-.015em;line-height:1}
+.rule{display:flex;align-items:center;gap:8px;width:180px;color:var(--accent)}
+.rule span{flex:1;height:1px;background:currentColor;opacity:.6}
+.rule i{width:6px;height:6px;background:currentColor;transform:rotate(45deg)}
+.bio{max-width:600px;margin:0 auto;text-align:center;font-size:clamp(13px,2.4vh,15px);line-height:1.6;text-wrap:pretty}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(max(220px,calc((100% - 56px)/3)),1fr));gap:clamp(12px,2.6vh,24px) 24px}
+.card{display:flex;flex-direction:column;justify-content:center;gap:6px;min-height:clamp(64px,12vh,110px);padding:clamp(12px,2.2vh,20px) 20px;border-radius:18px;border:1px solid var(--rule);background:color-mix(in oklab,var(--paper) 85%,transparent);text-decoration:none;color:var(--ink);transition:border-color .2s ease}
+.card:hover{border-color:var(--accent);color:var(--ink)}
+.card__title{font-size:14px;text-wrap:pretty;transition:color .2s ease}
+.card--project .card__title{font-weight:700}
+.card:hover .card__title{color:var(--accent)}
+.card__note{font-size:12.5px;font-style:italic;color:var(--ink-soft);text-wrap:pretty}
+.links{display:flex;justify-content:center;gap:8px;margin-top:clamp(0px,5vh,56px);margin-bottom:clamp(-40px,-3vh,0px)}
+.icon-link{width:38px;height:38px;display:grid;place-items:center;border-radius:999px;border:1px solid transparent;color:var(--ink-faded);opacity:.75;transition:border-color .2s ease,color .2s ease,opacity .2s ease}
+.icon-link:hover{border-color:var(--accent);color:var(--accent);opacity:1}
+@media (max-width:1180px){.corner-bloom{display:none}}
+@media (max-height:520px){main{justify-content:flex-start;min-height:unset}body{overflow-y:auto}}
+@media (prefers-reduced-motion:reduce){.bloom:hover{animation:none}}
