@@ -1,4 +1,5 @@
-:root{--font-mono:"Courier Prime",ui-monospace,Menlo,monospace;--paper:#0d0c0a;--ink:#ece6d4;--ink-soft:#c2b9a6;--ink-faded:#8a8275;--accent:#d4a85a;--rule:#2e2a24}
+:root{--font-mono:"Courier Prime",ui-monospace,Menlo,monospace;--paper:#150f15;--ink:#fff8fb;--ink-soft:#e1d1db;--ink-faded:#aa94a0;--accent:#e78cab;--toggle-hover:#d4a85a;--rule:#382632;--illustration-rule:#493440}
+body[data-background="dots"]{--paper:#0d0c0a;--ink:#fff8e7;--ink-soft:#e5d9c4;--ink-faded:#8a8275;--accent:#d4a85a;--toggle-hover:#e78cab;--rule:#2e2a24;--illustration-rule:#4a433a}
 *{box-sizing:border-box}
 html,body{margin:0;min-height:100%;background:var(--paper)}
 body{font-family:var(--font-mono);color:var(--ink)}
@@ -6,11 +7,15 @@ a{color:inherit}
 a:hover{color:var(--accent)}
 ::selection{background:var(--accent);color:var(--paper)}
 #dots{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.background-toggle{display:block;padding:0;border:0;background:transparent;color:var(--accent);cursor:pointer;transition:color .2s ease,filter .2s ease}
+.background-toggle:hover{color:var(--toggle-hover);filter:drop-shadow(0 0 9px color-mix(in oklab,var(--toggle-hover) 42%,transparent))}
+.background-toggle:focus-visible{outline:2px solid var(--accent);outline-offset:5px;border-radius:50%}
 main{position:relative;z-index:2;min-height:100vh;max-width:920px;margin:0 auto;padding:clamp(14px,4vh,56px) clamp(24px,6vw,72px);display:flex;flex-direction:column;justify-content:center;gap:clamp(12px,3vh,36px)}
 header{display:flex;flex-direction:column;align-items:center;gap:clamp(8px,1.8vh,20px);margin-top:clamp(-48px,-4vh,0px);text-align:center}
-.hero-bloom{width:clamp(60px,12vh,140px);color:var(--ink)}
+.hero-bloom.background-toggle{width:clamp(60px,12vh,140px);color:var(--accent);line-height:0}
+.hero-bloom.background-toggle:hover{color:var(--toggle-hover)}
 .bloom{display:block;width:100%;height:auto;transform-origin:50% 50%}
-.bloom:hover{animation:bloomSway 3.4s ease-in-out infinite}
+.background-toggle:is(:hover,:focus-visible) .bloom{animation:bloomSway 3.4s ease-in-out infinite}
 @keyframes bloomSway{0%,100%{transform:rotate(-2.6deg) scale(1)}50%{transform:rotate(2.6deg) scale(1.028)}}
 h1{margin:0;font-weight:700;font-size:clamp(28px,5.2vh,56px);letter-spacing:-.015em;line-height:1}
 .rule{display:flex;align-items:center;gap:8px;width:180px;color:var(--accent)}
@@ -42,4 +47,4 @@ h1{margin:0;font-weight:700;font-size:clamp(28px,5.2vh,56px);letter-spacing:-.01
 .icon-link:hover{border-color:var(--accent);color:var(--accent);opacity:1}
 @media (max-width:1180px){.corner-bloom{display:none}}
 @media (max-height:520px){main{justify-content:flex-start;min-height:unset}body{overflow-y:auto}}
-@media (prefers-reduced-motion:reduce){.bloom:hover{animation:none}}
+@media (prefers-reduced-motion:reduce){.background-toggle:is(:hover,:focus-visible) .bloom{animation:none}}
